@@ -1,0 +1,193 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id                   String                @id @default(uuid()) @db.Uuid
+  email                String?               @unique @map("email")
+  firstName            String?               @map("first_name")
+  lastName             String?               @map("last_name")
+  password             String?               @map("password")
+  phoneNumber          String?               @map("phone_number")
+  isGuest              Boolean               @default(false)
+  isGoogleUser         Boolean               @default(false)
+  deviceId             String?               @unique @map("device_id")
+  isDeleted            Boolean               @default(false) @map("is_deleted")
+  avatarId             Int                   @map("avatar_id")
+  otp                  String?               @map("otp")
+  otpExpiry            DateTime?             @map("otp_expiry")
+  isVerified           Boolean               @default(false) @map("is_verified")
+  correctAnswers       Int?                  @default(0) @map("correct_answers")
+  totalQuizPlayed      Int                   @default(0) @map("totalPlayQuiz")
+  fcmToken             String?               @map("fcm_token")
+  hasPlayedDailyQuiz   Boolean               @default(false) @map("has_played_daily_quiz")
+  adsRemoved           Boolean               @default(false) @map("ads_removed")
+  availableStamps      Int?                  @default(0) @map("available_stamp")
+  createdAt            DateTime?             @default(now()) @map("created_at")
+  updatedAt            DateTime?             @updatedAt @map("updated_at")
+  avatar               Avatar                @relation(fields: [avatarId], references: [id])
+  userQuestionsHistory UserQuestionHistory[]
+  feedback             Feedback[]
+  userSettings         UserSettings?
+  BookmarkedQuestion   BookmarkedQuestion[]
+  stampTransaction     StampTransaction[]
+
+  @@map("users")
+}
+
+model GuestUsers {
+  id        String   @id @default(uuid()) @db.Uuid
+  deviceId  String   @unique @map("device_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("guest_users")
+}
+
+model Categories {
+  id          Int         @id @default(autoincrement())
+  name        String      @unique @map("name")
+  image       String      @map("image")
+  sortIndex   Int         @map("sort_index")
+  attempt     Int         @default(3) @map("attempt")
+  isAvailable Boolean     @default(true) @map("is_available")
+  createdAt   DateTime?   @default(now()) @map("created_at")
+  updatedAt   DateTime?   @updatedAt @map("updated_at")
+  questions   Questions[]
+
+  @@map("categories")
+}
+
+model Questions {
+  id                 String               @id @default(uuid()) @db.Uuid
+  question           String               @map("question")
+  a                  String
+  b                  String
+  c                  String
+  d                  String
+  correctAnswer      String               @map("correct_answer")
+  correctAnswerText  String               @map("correct_answer_text")
+  difficultyLevel    Int                  @map("difficulty_level")
+  isAvailable        Boolean              @default(true) @map("is_available")
+  categoryId         Int                  @map("category_id")
+  category           Categories           @relation(fields: [categoryId], references: [id])
+  feedback           Feedback[]
+  BookmarkedQuestion BookmarkedQuestion[]
+
+  @@map("questions")
+}
+
+model BookmarkedQuestion {
+  id          String    @id @default(uuid())
+  user        Users     @relation(fields: [userId], references: [id])
+  userId      String    @map("user_id") @db.Uuid
+  question    Questions @relation(fields: [questionId], references: [id])
+  questionId  String    @map("question_id") @db.Uuid
+  isAvailable Boolean   @default(true) @map("is_available")
+  createdAt   DateTime  @default(now())
+
+  @@unique([userId, questionId])
+  @@map("bookmarked_questions")
+}
+
+model UserQuestionHistory {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  questionId String   @map("question_id")
+  isCorrect  Boolean
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user Users @relation(fields: [userId], references: [id])
+
+  @@map("user_questions_history")
+}
+
+model Avatar {
+  id          Int      @id @default(autoincrement())
+  image       String   @map("image")
+  isAvailable Boolean  @default(true) @map("is_available")
+  createdAt   DateTime @default(now()) @map("created_at")
+  users       Users[]
+
+  @@map("avatars")
+}
+
+model UserSettings {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @unique @map("user_id") @db.Uuid
+  notifications Boolean  @default(true) @map("notifications")
+  sound         Boolean  @default(true) @map("sound")
+  music         Boolean  @default(true) @map("music")
+  vibration     Boolean  @default(true) @map("vibration")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  user Users @relation(fields: [userId], references: [id])
+
+  @@map("user_settings")
+}
+
+model Feedback {
+  id         String     @id @default(uuid()) @db.Uuid
+  userId     String     @map("user_id") @db.Uuid
+  questionId String?    @map("question_id") @db.Uuid
+  feedback   String     @map("feedback")
+  createdAt  DateTime   @default(now()) @map("created_at")
+  user       Users      @relation(fields: [userId], references: [id])
+  question   Questions? @relation(fields: [questionId], references: [id])
+
+  @@map("feedback")
+}
+
+model Quotes {
+  id          String   @id @default(uuid()) @db.Uuid
+  text        String   @map("text")
+  author      String   @map("author")
+  isAvailable Boolean  @default(true) @map("is_available")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("quotes")
+}
+
+model appConfig {
+  id                      String  @id @default(uuid()) @db.Uuid
+  termsLink               String? @map("terms_link")
+  privacyPolicy           String? @map("privacy_policy")
+  minimumSupportedVersion String? @map("minimum_supported_version")
+  disclaimer              String? @map("disclaimer")
+  playStoreUrl            String? @map("play_store_url")
+  ads                     Json?   @map("ads")
+  quizPoints              Int?    @map("quiz_points")
+  dailyQuizPoints         Int?    @map("daily_quiz_points")
+  adType                  Int?    @map("ad_type")
+
+  @@map("app_config")
+}
+
+model StampTransaction {
+  id          String          @id @default(uuid()) @db.Uuid
+  userId      String          @map("user_id") @db.Uuid
+  type        TransactionType @default(ADD)
+  count       Int
+  description String?
+  createdAt   DateTime        @default(now()) @map("created_at")
+
+  user Users @relation(fields: [userId], references: [id])
+
+  @@map("stamp_transactions")
+}
+
+enum TransactionType {
+  ADD
+  REMOVE
+}

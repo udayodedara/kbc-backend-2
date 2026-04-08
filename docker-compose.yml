@@ -1,0 +1,45 @@
+services:
+  database:
+    image: postgres:15
+    restart: always
+    container_name: nest_postgres
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: quiz_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    command: ['postgres', '-c', 'listen_addresses=*']
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'myuser', '-d', 'quiz_db']
+      interval: 10s
+      retries: 3
+      start_period: 10s
+
+  app:
+    build: .
+    container_name: app
+    restart: always
+    depends_on:
+      - database
+    ports:
+      - '3000:3000'
+    command: npm run start
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: 'postgresql://myuser:mypassword@database:5432/quiz_db?connect_timeout=30'
+
+  adminer:
+    image: adminer
+    restart: always
+    container_name: adminer
+    ports:
+      - '8081:8080'
+
+volumes:
+  pgdata:
