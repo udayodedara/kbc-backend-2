@@ -18,7 +18,12 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "seed_categories": "ts-node prisma/seed/categories.ts"
+    "seed_categories": "ts-node prisma/seed/categories.ts",
+    "seed_avatars": "ts-node prisma/seed/avatars.ts",
+    "seed_avatars2": "ts-node prisma/seed/avatars2.ts",
+    "seed_general_knowledge": "ts-node prisma/seed/general_knowledge.ts",
+    "seed_questions": "ts-node prisma/seed/questions.ts",
+    "seed_quotes": "ts-node prisma/seed/quotes.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
