@@ -7,7 +7,9 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "npx prisma generate && nest build",
-    "start:dev": "nodemon",
+    "vercel-build": "npx prisma generate && nest build",
+    "postinstall": "npx prisma generate",
+    "start:dev": "nest start --watch",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start --watch",
     "start:debug": "nest start --debug --watch",
@@ -49,7 +51,9 @@
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "swagger-ui-express": "^5.0.1",
-    "typeorm": "^0.3.20"
+    "typeorm": "^0.3.20",
+    "pg": "^8.20.0",
+    "@prisma/adapter-pg": "^7.8.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -64,6 +68,7 @@
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.7",
     "@types/passport-jwt": "^4.0.1",
+    "@types/pg": "^8.20.0",
     "@types/supertest": "^6.0.2",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
