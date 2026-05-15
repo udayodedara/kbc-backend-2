@@ -3,6 +3,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { ResponseInterceptor } from './response/response.interceptor';
 import { HttpExceptionFilter } from './http-exception/http-exception.filter';
+import { SchemaService } from './schema/schema.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -21,6 +22,10 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
+
+  // Set the schema in SchemaService to be available via /schema route
+  const schemaService = app.get(SchemaService);
+  schemaService.setSchema(document);
 
   await app.listen(3000);
 }

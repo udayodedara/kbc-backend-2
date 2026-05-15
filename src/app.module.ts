@@ -14,9 +14,11 @@ import { ReferEarnModule } from './refer-earn/refer-earn.module';
 import { QuotesModule } from './quotes/quotes.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { QuestionsService } from './questions/questions.service';
+import { SchemaModule } from './schema/schema.module';
 
 @Module({
   imports: [
+    SchemaModule,
     UserModule,
     PrismaModule,
     ScheduleModule.forRoot(), // Schedule module for cron jobs
