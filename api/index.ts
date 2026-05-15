@@ -7,12 +7,23 @@ import { HttpExceptionFilter } from '../src/http-exception/http-exception.filter
 import express from 'express';
 
 const expressApp = express();
+// Workaround for NestJS 11 + Express 4 "app.router" deprecation error
+// This prevents app.get('router') from triggering the deprecated getter in Express 4
+expressApp.set('router', undefined);
+
 let cachedApp;
 
 async function bootstrap() {
   if (!cachedApp) {
-    const app = await NestFactory.create(AppModule, new ExpressAdapter(expressApp));
-    
+    // Disable automatic body parser registration to avoid internal Express/NestJS 11 compatibility issues
+    const app = await NestFactory.create(AppModule, new ExpressAdapter(expressApp), {
+      bodyParser: false,
+    });
+
+    // Manually add body parsers
+    expressApp.use(express.json());
+    expressApp.use(express.urlencoded({ extended: true }));
+
     // Global interceptors and filters
     app.useGlobalInterceptors(new ResponseInterceptor());
     app.useGlobalFilters(new HttpExceptionFilter());
@@ -38,3 +49,4 @@ export default async function handler(req, res) {
   await bootstrap();
   expressApp(req, res);
 }
+
